@@ -25,9 +25,9 @@ router.post('/api/new', function (req, res) {
       console.log('newcrime::', newcrime);
       var crimeData = JSON.parse(fs.readFileSync(dataFile, 'utf8'));  
       
-      //newcrime.id = crimeData.data.length+1;
+      newcrime.id = crimeData.data.length+1;
 
-      //crimeData.data.push(newcrime);
+      crimeData.data.push(newcrime);
 
       fs.writeFile(dataFile, JSON.stringify(crimeData, null, 4), function(err) {
         if(err) {
