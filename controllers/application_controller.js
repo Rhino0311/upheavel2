@@ -1,4 +1,5 @@
 var models  = require('../models');
+var bcrypt = require('bcryptjs');
 var express = require('express');
 var router  = express.Router();
 var fs = require('fs');
@@ -15,16 +16,30 @@ router.get('/', function(req, res) {
 });
 
 router.get('/api', function (req, res) {
-res.json(database.data);  
+res.json(database.data);
 });
 
 router.post('/api/new', function (req, res) {
+
+
+  					// Using the User model, create a new user,
+  					// storing the email they sent and the hash you just made
+  					models.Fave.create({
+  						name: req.body.fave_name,
+  						case: req.body.user_id,
+  					})
+  					// In a .then promise connected to that create method,
+  					// save the user's information to req.session
+  					// as shown in these comments
+
+  	          // redirect to home on login
+
   if(!req.body) return res.end();
-          var dataFile = "database.json";
+      var dataFile = "database.json";
       var newcrime = req.body;
       console.log('newcrime::', newcrime);
-      var crimeData = JSON.parse(fs.readFileSync(dataFile, 'utf8'));  
-      
+      var crimeData = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
+
       newcrime.id = crimeData.data.length+1;
 
       crimeData.data.push(newcrime);
@@ -35,7 +50,8 @@ router.post('/api/new', function (req, res) {
         }
       });
       res.redirect("/");
-      //res.json(newcrime);
+      // res.json(newcrime);
+
 
 
 });
@@ -46,6 +62,7 @@ router.get('/crimeapi', function (req, res) {
 
 router.get('/pawpost', function(req,res) {
   res.render('postPaw/pawpost');
+
 });
 
 // router.post('/addnote', function (req, res) {
@@ -62,7 +79,7 @@ router.get('/pawpost', function(req,res) {
 router.get('/readmore/:name', function (req, res) {
   var name = req.params.name;
   var user_id = req.session.user_id;
-  var crime = database.data.filter(function(crime) {  
+  var crime = database.data.filter(function(crime) {
   return crime.name === name;
   })[0];
   var crime_id = crime.id;
@@ -71,7 +88,7 @@ router.get('/readmore/:name', function (req, res) {
     where: {user_id: user_id, fave_name: name},
   }).then(function(favorite) {
     var favorite = favorite;
-      models.Note.findAll({ where: { crime_id: crime_id }, include: [ models.User ] 
+      models.Note.findAll({ where: { crime_id: crime_id }, include: [ models.User ]
       }).then(function(note){
         if(note) {
           res.render('cases/index', {
@@ -82,7 +99,7 @@ router.get('/readmore/:name', function (req, res) {
             crime: crime,
             favorite: favorite,
             note: note
-          }); 
+          });
         } else {
           res.render('cases/index', {
             user_id: user_id,
@@ -91,9 +108,9 @@ router.get('/readmore/:name', function (req, res) {
             logged_in: req.session.logged_in,
             crime: crime,
             favorite: favorite
-            });          
+            });
         }
-      }); 
+      });
 })
 });
 
@@ -108,7 +125,7 @@ router.get('/readmore/:name', function (req, res) {
 // });
 
 router.get('/profile', function (req, res) {
-var user_id = req.session.user_id;  
+var user_id = req.session.user_id;
 models.Fave.findAll({
   where: { user_id: user_id }
 }).then(function(favorite){
